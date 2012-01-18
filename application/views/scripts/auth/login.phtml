@@ -1,0 +1,36 @@
+<form action="?do=save" method="post">
+	<table style="margin:50px auto;width:300px;">
+<?php
+	if( isset($this->message) ):
+?>
+		<tr>
+			<td colspan="2" style="color:#700;font-weight:bold;" align="center">
+				<?php echo $this->message; ?>
+			</td>
+		</tr>
+<?php
+	endif;
+?>
+		<tr>
+			<td style="padding:5px;">
+				<label for="username">Username</label>
+			</td>
+			<td style="padding:5px;">
+				<input type="text" name="username" id="username" />
+			</td>
+		</tr>
+		<tr>
+			<td style="padding:5px;">
+				<label for="password">Password</label>
+			</td>
+			<td style="padding:5px;">
+				<input type="password" name="password" id="password" />
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" align="center" style="padding:5px;">
+				<input type="submit" value="Login"  style="padding:2px 5px;" />
+			</td>
+		</tr>
+	</table>
+</form>

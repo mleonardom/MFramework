@@ -1,0 +1,111 @@
+<?php
+/**
+ * MF_PHPExcel
+ *
+ * Copyright (c) 2006 - 2010 MF_PHPExcel
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * @category   MF_PHPExcel
+ * @package    MF_PHPExcel
+ * @copyright  Copyright (c) 2006 - 2010 MF_PHPExcel (http://www.codeplex.com/MF_PHPExcel)
+ * @license    http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt	LGPL
+ * @version    1.7.5, 2010-12-10
+ */
+
+
+/**
+ * MF_PHPExcel_WorksheetIterator
+ *
+ * Used to iterate worksheets in MF_PHPExcel
+ *
+ * @category   MF_PHPExcel
+ * @package    MF_PHPExcel
+ * @copyright  Copyright (c) 2006 - 2010 MF_PHPExcel (http://www.codeplex.com/MF_PHPExcel)
+ */
+class MF_PHPExcel_WorksheetIterator extends CachingIterator
+{
+	/**
+	 * Spreadsheet to iterate
+	 *
+	 * @var MF_PHPExcel
+	 */
+	private $_subject;
+
+	/**
+	 * Current iterator position
+	 *
+	 * @var int
+	 */
+	private $_position = 0;
+
+	/**
+	 * Create a new worksheet iterator
+	 *
+	 * @param MF_PHPExcel 		$subject
+	 */
+	public function __construct(MF_PHPExcel $subject = null) {
+		// Set subject
+		$this->_subject = $subject;
+	}
+
+	/**
+	 * Destructor
+	 */
+	public function __destruct() {
+		unset($this->_subject);
+	}
+
+	/**
+	 * Rewind iterator
+	 */
+    public function rewind() {
+        $this->_position = 0;
+    }
+
+    /**
+     * Current MF_PHPExcel_Worksheet
+     *
+     * @return MF_PHPExcel_Worksheet
+     */
+    public function current() {
+    	return $this->_subject->getSheet($this->_position);
+    }
+
+    /**
+     * Current key
+     *
+     * @return int
+     */
+    public function key() {
+        return $this->_position;
+    }
+
+    /**
+     * Next value
+     */
+    public function next() {
+        ++$this->_position;
+    }
+
+    /**
+     * More MF_PHPExcel_Worksheet instances available?
+     *
+     * @return boolean
+     */
+    public function valid() {
+        return $this->_position < $this->_subject->getSheetCount();
+    }
+}

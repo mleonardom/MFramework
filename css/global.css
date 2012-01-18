@@ -1,0 +1,15 @@
+@CHARSET "UTF-8";
+*{
+	margin: 0;
+	padding: 0;
+}
+body, table, form{
+	font-family: verdana, arial, serif;
+	font-size: 10pt;
+	color: #555;
+}
+#wrapper{
+	width: 970px;
+	max-width: 970px;
+	margin: 0 auto;
+}

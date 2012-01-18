@@ -1,0 +1,9 @@
+<h1>This app si running on a development environment:</h1>
+<h2>Error code <?php echo self::$error_code; ?>:</h2>
+<?php
+	// TODO fix MF_Error backtrace
+	echo self::$error_message;
+	echo '<br /><br />';
+	echo '<pre>';
+    debug_print_backtrace();  
+    echo '</pre>';
