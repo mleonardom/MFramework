@@ -13,14 +13,14 @@ class MF_Bootstrap{
 	 * The extracted controller name
 	 * @var string
 	 */
-	protected $controller;
+	protected static $controller;
 	
 	/**
 	 * 
 	 * The extracted action name
 	 * @var string
 	 */
-	protected $action;
+	protected static $action;
 	
 	/**
 	 * 
@@ -34,14 +34,14 @@ class MF_Bootstrap{
 	 * The default controller name ('index' is default)
 	 * @var string
 	 */
-	protected $default_controller;
+	protected static $default_controller;
 	
 	/**
 	 * 
 	 * The default action name ('index' is default)
 	 * @var string
 	 */
-	protected $default_action;
+	protected static $default_action;
 	
 	/**
 	 * 
@@ -56,10 +56,10 @@ class MF_Bootstrap{
 	 * @param string $default_action (default value is 'index')
 	 */
 	public function _run($default_controller = 'index', $default_action= 'index'){
-		$this->default_controller = $default_controller;
-		$this->default_action = $default_action;
-		$this->controller=$this->default_controller;
-		$this->action=$this->default_action;
+		self::$default_controller = $default_controller;
+		self::$default_action = $default_action;
+		self::$controller=self::$default_controller;
+		self::$action=self::$default_action;
 		$this->explode_http_request()->parse_http_request()->route_request();
 	}
 	
@@ -101,9 +101,9 @@ class MF_Bootstrap{
 				$part = substr( $part, 0, strrpos($part,"?") );
 			}
 			if( $index == 0 && !empty($part) ) {
-				$this->controller = $part;
+				self::$controller = $part;
 			} elseif( $index == 1 && !empty($part) ) {
-				$this->action = $part;
+				self::$action = $part;
 			} else {
 				if( $p_index === null ) {
 					$p_index = utf8_decode(urldecode($part));
@@ -126,9 +126,9 @@ class MF_Bootstrap{
 	 * @return MF_Bootstrap This instance
 	 */
 	protected function route_request() {
-		$controllerfile=CONTROLLERS_PATH.ucfirst($this->controller).'Controller.php';
-		$class_name = ucfirst($this->controller).'Controller';
-		if (!preg_match('#^[A-Za-z0-9_-]+$#',$this->controller) || !file_exists($controllerfile)){
+		$controllerfile=CONTROLLERS_PATH.ucfirst(self::$controller).'Controller.php';
+		$class_name = ucfirst(self::$controller).'Controller';
+		if (!preg_match('#^[A-Za-z0-9_-]+$#',self::$controller) || !file_exists($controllerfile)){
 			MF_Error::dieError('Controller file not found: '.$controllerfile, 404);
 		}else{
 			include_once($controllerfile);
@@ -136,17 +136,16 @@ class MF_Bootstrap{
 		if( !class_exists($class_name) || !is_subclass_of($class_name, 'MF_Controller') ){
 			MF_Error::dieError($controllerfile.' exists, but class: <strong>'.$class_name.'</strong> is not defined or not exteds from MF_Controller Class',404);
 		}
-		$viewfile = $this->controller.'/'.$this->action;
 		
-		$controllerObj = new $class_name($viewfile, $this);
-		if( strrpos($this->action,'-') !== false ){
-			$action_s = explode('-',$this->action);
+		$controllerObj = new $class_name();
+		if( strrpos(self::$action,'-') !== false ){
+			$action_s = explode('-',self::$action);
 			$action_fm = "";
 			foreach( $action_s as $k => $a_p ){
 				$action_fm .= $k==0? strtolower($a_p):ucfirst($a_p);
 			}
 		}else{
-			$action_fm = $this->action;
+			$action_fm = self::$action;
 		}
 		$function=$action_fm.'Action';
 		if (!preg_match('#^[A-Za-z_][A-Za-z0-9_-]*$#',$function))
@@ -165,8 +164,8 @@ class MF_Bootstrap{
 	 * Get the current controller name
 	 * @return string controller
 	 */
-	public function getController(){
-		return $this->controller;
+	public static function getController(){
+		return self::$controller;
 	}
 	
 	/**
@@ -174,8 +173,8 @@ class MF_Bootstrap{
 	 * Get the current action name
 	 * @return string action
 	 */
-	public function getAction(){
-		return $this->action;
+	public static function getAction(){
+		return self::$action;
 	}
 	
 	/**
@@ -183,8 +182,8 @@ class MF_Bootstrap{
 	 * Get the default controller name
 	 * @return string default_controller
 	 */
-	public function getDefaultController(){
-		return $this->default_controller;
+	public static function getDefaultController(){
+		return self::$default_controller;
 	}
 	
 	/**
@@ -192,7 +191,7 @@ class MF_Bootstrap{
 	 * Get the default action name
 	 * @return string default_action
 	 */
-	public function getDefaultAction(){
-		return $this->default_action;
+	public static function getDefaultAction(){
+		return self::$default_action;
 	}
 }

@@ -7,10 +7,25 @@
 
         protected $columns = array();
         protected $className;
+        /**
+         * Data for referenced models.
+         * I.E: the Model Gallery has many images
+         * Structure for Image Model:
+         * $reference_models = array(
+         *	 "gallery" => array( // Any text for reference becuse you can get 2 o more relations to a same table
+         * 		"column" => "gallery_id", // INDEX column in the Image Model
+         * 		"refModel" => "Gallery" // Model class name to reference
+         * 		"refColumn" => "id" // Column in the other Model to reference
+         * 	) // you can insert more here
+         * );
+         * @var array
+         */
+        protected $reference_models = array();
 
-        protected function __construct($table_name, $id = null){
+        protected function __construct($table_name){
+        	defined('DB_TABLE_PREFIX') || define('DB_TABLE_PREFIX', '');
             $this->className    = get_class($this);
-            $this->tableName    = $table_name;
+            $this->tableName    = DB_TABLE_PREFIX.$table_name;
 
             // A note on hardcoding $this->idColumnName = 'id'...
             // In three years working with this framework, I've used
@@ -18,9 +33,6 @@
             // drop the option from the constructor. You can overload
             // the constructor yourself if you have the need.
             if(!isset($this->idColumnName)) $this->idColumnName = 'id';
-
-            if(!is_null($id))
-                $this->select($id);
         }
 
         public function __get($key)
@@ -113,7 +125,44 @@
 
             return $db->affectedRows();
         }
-
+		
+        /**
+         * Return yhe dependents objects for the $class_name model especified
+         * @param string $class_name
+         * @param string $reference_key
+         */
+        public function getDependentRows( $class_name, $reference_key = false ){
+        	if(!class_exists($class_name)){
+                return false;
+        	}
+        	$tmp_obj = new $class_name;
+        	foreach($tmp_obj->reference_models as $k => $ref){
+        		if( $ref['refModel'] == get_class($this) && (!$reference_key || $k == $reference_key ) ){
+        			$ref_model = $ref;
+        			break;
+        		}
+        	}
+            $objects = MF_Model::glob($class_name,"SELECT * FROM `{$tmp_obj->tableName}` WHERE `{$ref_model['column']}`=".$this->{$ref_model['refColumn']});
+            return $objects;
+        }
+        
+        public function getParent( $class_name, $reference_key = false ){
+        	if(!class_exists($class_name)){
+                return false;
+        	}
+        	$tmp_obj = new $class_name;
+        	foreach($this->reference_models as $k => $ref){
+        		if( $ref['refModel'] == $class_name && (!$reference_key || $k == $reference_key ) ){
+        			$ref_model = $ref;
+        			break;
+        		}
+        	}
+        	if( $tmp_obj->select( $this->{$ref_model['column']}, $ref_model['refColumn'] ) ){
+        		return $tmp_obj;
+        	}
+        	return false;
+        }
+        
         public function delete() {
             if(is_null($this->id)) return false;
             $db = MF_Database::getDatabase();

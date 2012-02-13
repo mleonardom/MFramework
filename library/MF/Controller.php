@@ -3,6 +3,34 @@ abstract class MF_Controller{
 	
 	/**
 	 * 
+	 * The controller to load
+	 * @var string
+	 */
+	protected $controller;
+	
+	/**
+	 * 
+	 * The action to load
+	 * @var string
+	 */
+	protected $action;
+	
+	/**
+	 * 
+	 * The default controller
+	 * @var string
+	 */
+	protected $default_controller;
+	
+	/**
+	 * 
+	 * The default action
+	 * @var string
+	 */
+	protected $default_action;
+	
+	/**
+	 * 
 	 * The layout for this controller
 	 * @var MF_View
 	 */
@@ -27,8 +55,10 @@ abstract class MF_Controller{
 	 * Construct for controller, The $view_content var is an instance for the action view to render 
 	 * @param MF_View $view_content
 	 */
-	public function __construct($view_content)  {
-		$this->view_content = $view_content;
+	public function __construct()  {
+		$this->controller = MF_Bootstrap::getController();
+		$this->action = MF_Bootstrap::getAction();
+		$this->view_content = $this->controller.'/'.$this->action;
 		$this->view = new MF_View();
 		$this->view->setContent($this->view_content);
 		$this->setLayout(DEFAULT_LAYOUT.".phtml");

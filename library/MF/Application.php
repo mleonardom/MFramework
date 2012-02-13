@@ -48,11 +48,8 @@ class MF_Application{
 		}
 		try{
 			@include_once($filename);
-			// TODO fix this?
-			/*if( !class_exists($class) )
-				MF_Error::showError('Class: <strong>'.$class.'</strong> not found on '.$filename.' file.', 404);*/
 		}catch( Exception $e ){
-			//MF_Error::dieError('File: <strong>'.$filename.'</strong> not found.', 404);
+			//TODO MF_Error::dieError('File: <strong>'.$filename.'</strong> not found.', 404);
 		}
 	}
 	
