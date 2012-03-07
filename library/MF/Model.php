@@ -127,7 +127,7 @@
         }
 		
         /**
-         * Return yhe dependents objects for the $class_name model especified
+         * Return the dependents objects for the $class_name model especified
          * @param string $class_name
          * @param string $reference_key
          */
@@ -143,6 +143,32 @@
         		}
         	}
             $objects = MF_Model::glob($class_name,"SELECT * FROM `{$tmp_obj->tableName}` WHERE `{$ref_model['column']}`=".$this->{$ref_model['refColumn']});
+            return $objects;
+        }
+		
+		/**
+         * Return the dependents objects for the $class_name model especified trouth the $through_class
+         * @param string $class_name
+         * @param string $through_class
+         */
+        public function getManyToManyRows( $class_name, $through_class ){
+        	if(!class_exists($class_name) || !class_exists($through_class)){
+                return false;
+        	}
+        	$tmp_obj = new $class_name;
+			$tmp_through = new $through_class;
+        	foreach($tmp_through->reference_models as $k => $ref){
+        		if( $ref['refModel'] == get_class($this) ){
+        			$ref_o_model = $ref;
+        		}elseif( $ref['refModel'] == $class_name ){
+        			$ref_d_model = $ref;
+        		}
+        	}
+			$sql = "SELECT  `{$tmp_obj->tableName}`.* 
+				FROM  `{$tmp_through->tableName}` 
+				INNER JOIN  `{$tmp_obj->tableName}` ON `{$tmp_through->tableName}`.`{$ref_d_model['column']}` =  `{$tmp_obj->tableName}`.`{$ref_d_model['refColumn']}` 
+				WHERE  `{$tmp_through->tableName}`.`{$ref_o_model['column']}`=".$this->{$ref_o_model['refColumn']};
+            $objects = MF_Model::glob($class_name,$sql);
             return $objects;
         }
         
