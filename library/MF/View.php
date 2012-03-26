@@ -4,9 +4,15 @@ class MF_View {
 	protected $content = null;
 	protected $styles = array();
 	protected $scripts = array();
-
+	protected static $flash_messages;
 	public function __construct($file=null){
 		if( $file !== null ) $this->setFile($file);
+		if( isset($_SESSION['flash_messages']) ){
+			self::$flash_messages = $_SESSION['flash_messages'];
+			unset( $_SESSION['flash_messages'] );
+		}else{
+			self::$flash_messages = array();
+		}
 	}
 	
 	public function addStyle( $file_name ){
@@ -17,10 +23,19 @@ class MF_View {
 		$this->scripts[] = $file_name;
 	}
 	
+	public function addFlashMessage( $message ){
+		self::$flash_messages[] = $message;
+		$_SESSION['flash_messages'] = self::$flash_messages;
+	}
+	
+	public function getFlashMessages(){
+		return count($flash_messages)>0?self::$flash_messages:false;
+	}
+	
 	protected function getStyles(){
 		$xhtml = "<!-- Styles -->\n";
 		foreach( $this->styles as $s ){
-			if( preg_match('~^http://~', $s) ){
+			if( preg_match('~^http://~', $s) || preg_match('~^https://~', $s) ){
 				$href = $s;
 			}else{
 				$href = '/'.BASE_URL.'/'.$s;
@@ -33,7 +48,7 @@ class MF_View {
 	protected function getScripts(){
 		$xhtml = "<!-- Scripts -->\n";
 		foreach( $this->scripts as $s ){
-			if( preg_match('~^http://~', $s) ){
+			if( preg_match('~^http://~', $s) || preg_match('~^https://~', $s) ){
 				$src = $s;
 			}else{
 				$src = '/'.BASE_URL.'/'.$s;
