@@ -18,7 +18,7 @@
 	// set the base URL
 	define('BASE_URL','MFramework');
 	
-	// set envirotment
+	// set environtment
 	define('ENVIROTMENT','development'); // can be: production or development
 	
 	require_once(APPLICATION_PATH.'/.config/application.php');
