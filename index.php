@@ -25,5 +25,6 @@
 	require_once 'MF/Application.php';
 	
     $application = new MF_Application();
+	$application->getBootstrap()->setModules( array('public', 'admin') );
     $application->getBootstrap()->_run();
 ?>

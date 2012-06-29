@@ -23,13 +23,13 @@ class MF_Error{
 			header("HTTP/1.0 ".$code);
 		
 		if( ENVIROTMENT == 'production' ){
-			if( file_exists(VIEWS_PATH.'errors/'.$code.'.phtml') )
-				require(VIEWS_PATH.'errors/'.$code.'.phtml');
+			if( file_exists(MF_Bootstrap::getViewsPath().'errors/'.$code.'.phtml') )
+				require(MF_Bootstrap::getViewsPath().'errors/'.$code.'.phtml');
 			else
-				require(VIEWS_PATH.'errors/default.phtml');
+				require(MF_Bootstrap::getViewsPath().'errors/default.phtml');
 		}else{
 			self::$error_message = $message;
-			require(VIEWS_PATH.'errors/development.phtml');
+			require(MF_Bootstrap::getViewsPath().'errors/development.phtml');
 		}
 	}
 	

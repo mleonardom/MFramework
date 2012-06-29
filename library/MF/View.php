@@ -69,8 +69,8 @@ class MF_View {
 		$filename = strtolower(preg_replace('/([a-z]+)([A-Z])/', '$1-$2', $filename));
 		if( !preg_match('/\.phtml/', $filename) ) $filename .= '.phtml';
 		if( !file_exists($filename) ){
-			if( file_exists(VIEWS_PATH.$filename) ){
-				$filename = VIEWS_PATH.$filename;
+			if( file_exists(MF_Bootstrap::getViewsPath().$filename) ){
+				$filename = MF_Bootstrap::getViewsPath().$filename;
 			}else{
 				MF_Error::dieError('View file: <strong>'.$filename.'</strong> not found.', 404);
 			}
@@ -114,7 +114,7 @@ class MF_View {
 		}
 	}
 	
-	public static function getURL( array $parts, $overwrite = false ){ // TODO
+	public static function getURL( array $parts, $overwrite = false ){
 		/*$url = '/'.BASE_URL.'/';
 		$vars = "";
 		if( !isset($parts['controller']) ) $parts['controller'] = $overwrite? MF_Application::getBootstrap()->getDefaultController():MF_Application::getBootstrap()->getController();

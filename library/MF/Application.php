@@ -44,7 +44,7 @@ class MF_Application{
 		$parts = explode('_',$class);
 		$filename = implode("/",$parts).'.php';
 		if( !file_exists($filename) && count($parts) == 1 ){
-			$filename = MODELS_PATH.$class.'.php';
+			$filename = APPLICATION_PATH."/models/".$class.'.php';
 		}
 		try{
 			@include_once($filename);

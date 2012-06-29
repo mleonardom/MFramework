@@ -3,6 +3,13 @@ abstract class MF_Controller{
 	
 	/**
 	 * 
+	 * The module to load
+	 * @var string
+	 */
+	protected $module;
+	
+	/**
+	 * 
 	 * The controller to load
 	 * @var string
 	 */
@@ -14,6 +21,13 @@ abstract class MF_Controller{
 	 * @var string
 	 */
 	protected $action;
+	
+	/**
+	 * 
+	 * The default module
+	 * @var string
+	 */
+	protected $default_module;
 	
 	/**
 	 * 
@@ -56,6 +70,7 @@ abstract class MF_Controller{
 	 * @param MF_View $view_content
 	 */
 	public function __construct()  {
+		$this->module = MF_Bootstrap::getModule();
 		$this->controller = MF_Bootstrap::getController();
 		$this->action = MF_Bootstrap::getAction();
 		$this->view_content = $this->controller.'/'.$this->action;

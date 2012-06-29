@@ -10,6 +10,20 @@ class MF_Bootstrap{
 	
 	/**
 	 * 
+	 * List of active modules
+	 * @var array
+	 */
+	protected static $modules_list;
+	
+	/**
+	 * 
+	 * The extracted module name
+	 * @var string
+	 */
+	protected static $module;
+	
+	/**
+	 * 
 	 * The extracted controller name
 	 * @var string
 	 */
@@ -28,6 +42,13 @@ class MF_Bootstrap{
 	 * @var array
 	 */
 	protected $params=array();
+	
+	/**
+	 * 
+	 * The default module name
+	 * @var string
+	 */
+	protected static $default_module;
 	
 	/**
 	 * 
@@ -64,6 +85,31 @@ class MF_Bootstrap{
 	}
 	
 	/**
+	 * Set the modules, if are more that one
+	 */
+	public function setModules( array $modules ){
+		if( !is_null($modules) && !empty($modules) && count($modules) > 0 ){
+			$modules_list = array();
+			foreach( $modules as $m ){
+				if( is_array($m) ){
+					$modules_list[] = $m['module'];
+					if( $m['default'] ){
+						self::$default_module = $m['module'];
+					}
+				}else{
+					$modules_list[] = $m;
+				}
+			}
+			if( is_null(self::$default_module) || empty(self::$default_module) ){
+				self::$default_module = $modules_list[0];
+			}
+			self::$modules_list = $modules_list;
+		}else{
+			self::$modules_list = null;
+		}
+	}
+	
+	/**
 	 * 
 	 * Explode the HTTP request
 	 * @return MF_Bootstrap This instance
@@ -90,6 +136,15 @@ class MF_Bootstrap{
 		$p = $this->request_uri_parts;
 		$p_index = null;
 		$p_value = null;
+		if( !is_null(self::$modules_list) && !empty(self::$modules_list) ){
+			if( isset($p[0]) && !empty($p[0]) && in_array($p[0], self::$modules_list) ){
+				self::$module = $p[0];
+				unset($p[0]);
+				$p = array_values( $p );
+			}else{
+				self::$module = self::$default_module;
+			}
+		}
 		foreach( $p as $index => $part ){
 			if( strrpos($part, "?") !== false ) {
 				$params_ov = substr( $part, strrpos($part, "?")+1 );
@@ -126,8 +181,11 @@ class MF_Bootstrap{
 	 * @return MF_Bootstrap This instance
 	 */
 	protected function route_request() {
-		$controllerfile=CONTROLLERS_PATH.ucfirst(self::$controller).'Controller.php';
+		$controllerfile=self::getControllersPath().ucfirst(self::$controller).'Controller.php';
 		$class_name = ucfirst(self::$controller).'Controller';
+		if( self::$module != self::$default_module ){
+			$class_name = ucfirst(self::$module).'_'.$class_name;
+		}
 		if (!preg_match('#^[A-Za-z0-9_-]+$#',self::$controller) || !file_exists($controllerfile)){
 			MF_Error::dieError('Controller file not found: '.$controllerfile, 404);
 		}else{
@@ -161,6 +219,51 @@ class MF_Bootstrap{
 	
 	/**
 	 * 
+	 * Get the controllers path
+	 * @return string controllers_path
+	 */
+	public static function getControllersPath(){
+		if( !is_null(self::$module) ){
+			return APPLICATION_PATH."/modules/".self::$module.'/controllers/';
+		}
+		return APPLICATION_PATH.'/controllers/';
+	}
+	
+	/**
+	 * 
+	 * Get the views path
+	 * @return string views_path
+	 */
+	public static function getViewsPath(){
+		if( !is_null(self::$module) ){
+			return APPLICATION_PATH."/modules/".self::$module.'/views/scripts/';
+		}
+		return APPLICATION_PATH.'/views/scripts/';
+	}
+	
+	/**
+	 * 
+	 * Get the partials path
+	 * @return string partials_path
+	 */
+	public static function getPartialsPath(){
+		if( !is_null(self::$module) ){
+			return APPLICATION_PATH."/modules/".self::$module.'/views/partials/';
+		}
+		return APPLICATION_PATH.'/views/partials/';
+	}
+	
+	/**
+	 * 
+	 * Get the current module name
+	 * @return string controller
+	 */
+	public static function getModule(){
+		return self::$module;
+	}
+	
+	/**
+	 * 
 	 * Get the current controller name
 	 * @return string controller
 	 */
@@ -175,6 +278,15 @@ class MF_Bootstrap{
 	 */
 	public static function getAction(){
 		return self::$action;
+	}
+	
+	/**
+	 * 
+	 * Get the default module name
+	 * @return string default_module
+	 */
+	public static function getDefaultModule(){
+		return self::$default_module;
 	}
 	
 	/**

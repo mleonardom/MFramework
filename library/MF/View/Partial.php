@@ -11,8 +11,8 @@ class MF_View_Partial extends MF_View
 		$filename = strtolower(preg_replace('/([a-z]+)([A-Z])/', '$1-$2', $filename));
 		if( !preg_match('/\.phtml/', $filename) ) $filename .= '.phtml';
 		if( !file_exists($filename) ){
-			if( file_exists(PARTIALS_PATH.$filename) ){
-				$filename = PARTIALS_PATH.$filename;
+			if( file_exists(MF_Bootstrap::getPartialsPath().$filename) ){
+				$filename = MF_Bootstrap::getPartialsPath().$filename;
 			}else{
 				MF_Error::dieError('Partial file: <strong>'.$filename.'</strong> not found.', 404);
 			}
