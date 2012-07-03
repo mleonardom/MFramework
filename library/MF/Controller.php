@@ -3,27 +3,6 @@ abstract class MF_Controller{
 	
 	/**
 	 * 
-	 * The module to load
-	 * @var string
-	 */
-	protected $module;
-	
-	/**
-	 * 
-	 * The controller to load
-	 * @var string
-	 */
-	protected $controller;
-	
-	/**
-	 * 
-	 * The action to load
-	 * @var string
-	 */
-	protected $action;
-	
-	/**
-	 * 
 	 * The default module
 	 * @var string
 	 */
@@ -70,10 +49,7 @@ abstract class MF_Controller{
 	 * @param MF_View $view_content
 	 */
 	public function __construct()  {
-		$this->module = MF_Bootstrap::getModule();
-		$this->controller = MF_Bootstrap::getController();
-		$this->action = MF_Bootstrap::getAction();
-		$this->view_content = $this->controller.'/'.$this->action;
+		$this->view_content = MF_Bootstrap::getController().'/'.MF_Bootstrap::getAction();
 		$this->view = new MF_View();
 		$this->view->setContent($this->view_content);
 		$this->setLayout(DEFAULT_LAYOUT.".phtml");
@@ -105,7 +81,7 @@ abstract class MF_Controller{
 	 * @param string $to
 	 */
 	public function redirect($to){
-		// TODO accept arrays too
+		if( is_array($to) ) $to = $this->view->getURL($to);
 		$this->is_redirected = true;
 		header("Location: $to");
 	}

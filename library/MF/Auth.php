@@ -7,38 +7,10 @@
          * @var MF_Auth
          */
         private static $_instance;
-		
-        /**
-         * 
-         * The Auth user id attribute
-         * @var int
-         */
-        public $id;
         
         /**
          * 
-         * The Auth user username attribute
-         * @var string
-         */
-        public $username;
-        
-        /**
-         * 
-         * The Auth user active attribute
-         * @var int
-         */
-        public $active;
-        
-        /**
-         * 
-         * The Auth user access level attribute
-         * @var string
-         */
-        public $level;
-        
-        /**
-         * 
-         * Model User object (if available)
+         * Model User object
          * @var User
          */
         public $user;
@@ -49,6 +21,13 @@
          * @var boolean
          */
         private $loggedIn;
+        
+        /**
+         * 
+         * Secret key for hash the password
+         * @var string
+         */
+        private $secret_key = '';
 
         /**
          * 
@@ -59,16 +38,9 @@
          * login a user. Set it to true.
          */
         private function __construct() {
-            $this->id             = null;
-            $this->username       = null;
-            $this->active         = null;
-            $this->level          = 'guest';
-            $this->user           = null;
             $this->loggedIn       = false;
-
-            if(class_exists('User') && (is_subclass_of('User', 'MF_Model')))
-                $this->user = new User();
-                
+            $this->user = new User();
+            
             if($this->attemptSessionLogin()){
                 return;
             }
@@ -76,7 +48,7 @@
 
         /**
          * Standard singleton
-         * @return Auth
+         * @return MF_Auth
          */
         public static function getInstance() {
             if( self::$_instance === null )
@@ -93,13 +65,9 @@
          * @param string $pw unhashed password
          */
         public function login($un, $pw) {
-            $pw = $this->createHashedPassword($pw);
             if( !$this->attemptLogin($un, $pw) ) return false;
-            
-            if( class_exists("User") && is_subclass_of("User", "MF_Model") ){
-            	$this->user->last_login = date("Y-m-d H:i:s");
-            	$this->user->save();
-            }
+            $this->user->last_login = date("Y-m-d H:i:s");
+            $this->user->save();
             return true;
         }
 		
@@ -108,16 +76,8 @@
          * Close the user session
          */
         public function logout(){
-            $this->id             = null;
-            $this->username       = null;
-            $this->active         = null;
-            $this->level          = 'guest';
-            $this->user           = null;
             $this->loggedIn       = false;
-
-            if(class_exists('User') && (is_subclass_of('User', 'MF_Model')))
-                $this->user = new User();
-
+			$this->user = new User();
             unset($_SESSION['user_id']);
         }
 		
@@ -129,6 +89,16 @@
          */
         public function isLogged() {
             return $this->loggedIn;
+        }
+        
+    	/**
+         * 
+         * Is a user logged in and are an administrator? This was broken out into its own function
+         * in case extra logic is ever required beyond a simple bool value.
+         * @return isAdmin
+         */
+        public function isAdmin() {
+            return $this->loggedIn && $this->user->level == 'admin';
         }
 		
         // 
@@ -143,37 +113,19 @@
          * @param unknown_type $user_to_impersonate Takes an id or username
          */
         public function impersonate($user_to_impersonate){
-        	if(class_exists('User') && (is_subclass_of('User', 'MF_Model'))){
-                $this->user = new User();
-                $table_name = $this->user->tableName;
-        	}else{
-        		$table_name = 'users';
-        	}
+			$this->user = new User();
+			$table_name = $this->user->tableName;
             $db = MF_Database::getDatabase();
-
             if(ctype_digit($user_to_impersonate))
                 $row = $db->getRow('SELECT * FROM `'.$table_name.'` WHERE id = ' . $db->quote($user_to_impersonate));
             else
                 $row = $db->getRow('SELECT * FROM `'.$table_name.'` WHERE username = ' . $db->quote($user_to_impersonate));
 
-            if(is_array($row))
-            {
-                $this->id       = $row['id'];
-                $this->username = $row['username'];
-                $this->active = $row['active'];
-                $this->level    = $row['level'];
+            if(is_array($row)) {
+				$this->user = new User();
+				$this->user->select( $row['id'] );
 
-                // Load any additional user info if Model and User are available
-                if(class_exists('User') && (is_subclass_of('User', 'MF_Model')))
-                {
-                    $this->user = new User();
-                    $this->user->id = $row['id'];
-                    $this->user->load($row);
-                }
-
-                $row['password'] = $this->createHashedPassword($row['password']);
-
-                $this->storeSessionData($this->id);
+                $this->storeSessionData($this->user->id);
                 $this->loggedIn = true;
 
                 return true;
@@ -201,14 +153,10 @@
          * @param unknown_type $pw <strong>hashed</strong> password
          * @return boolean true if the attemp is successful
          */
-        private function attemptLogin($un, $pw)
-        {
-        	if(class_exists('User') && (is_subclass_of('User', 'MF_Model'))){
-                $this->user = new User();
-                $table_name = $this->user->tableName;
-        	}else{
-        		$table_name = 'users';
-        	}
+        private function attemptLogin($un, $pw) {
+			$this->user = new User();
+			$table_name = $this->user->tableName;
+        	$pw = $this->createHashedPassword($pw);
         	
             $db = MF_Database::getDatabase();
             
@@ -216,24 +164,11 @@
             $row = $db->getRow('SELECT * FROM `'.$table_name.'` WHERE username = ' . $db->quote($un));
             if($row === false) return false;
             
-            //$row['password'] = $this->createHashedPassword($row['password']);
-
             if($pw != $row['password']) return false;
 
-            $this->id       = $row['id'];
-            $this->username = $row['username'];
-            $this->active = $row['active'];
-            $this->level    = $row['level'];
-
             // Load any additional user info if Model and User are available
-            if(class_exists('User') && (is_subclass_of('User', 'MF_Model'))) {
-                $this->user->id = $row['id'];
-                $this->user->load($row);
-            }else{
-            	MF_Error::dieError( "Class User dont exists or is not a subclass of MF_Model", 500 );
-            }
-			
-            if( $this->active ) $this->storeSessionData($this->id);
+			$this->user->select($row['id']);
+            $this->storeSessionData($this->user->id);
             $this->loggedIn = true;
 
             return true;
@@ -245,8 +180,7 @@
          * Store a user in the user session data
          * @param int $u_id User id
          */
-        private function storeSessionData($u_id)
-        {
+        private function storeSessionData($u_id){
             if(headers_sent()) return false;
             $_SESSION['user_id'] = $u_id;
         }
@@ -258,6 +192,6 @@
          * @return hashed_password
          */
         private function createHashedPassword($pw) {
-            return md5($pw);
+            return md5($this->secret_key.$pw);
         }
     }

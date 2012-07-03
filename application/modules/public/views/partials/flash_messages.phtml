@@ -1,0 +1,21 @@
+<?php
+	if( $this->flash_messages ){
+		foreach( $this->flash_messages as $k => $m ){
+			if( is_array($m) ){
+				echo '<div class="'.$k.'_message">';
+				if( count($m) > 1 ){
+					echo '<ul>';
+					foreach( $m as $sm ){
+						echo '<li>'.$sm.'</li>';
+					}
+					echo '</ul>';
+				}else{
+					echo $m[0];
+				}
+				echo '</div>';
+			}else{
+				echo '<div class="message">'.$m.'</div>';
+			}
+		}
+	}
+?>

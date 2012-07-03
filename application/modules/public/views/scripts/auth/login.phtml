@@ -1,15 +1,7 @@
 <form action="?do=save" method="post">
 	<table style="margin:50px auto;width:300px;">
 <?php
-	if( isset($this->message) ):
-?>
-		<tr>
-			<td colspan="2" style="color:#700;font-weight:bold;" align="center">
-				<?php echo $this->message; ?>
-			</td>
-		</tr>
-<?php
-	endif;
+	$this->partial( 'flash_messages', array('flash_messages'=>$this->getFlashMessages()) );
 ?>
 		<tr>
 			<td style="padding:5px;">

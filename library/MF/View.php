@@ -1,16 +1,18 @@
 <?php
 class MF_View {
+	
 	protected $file = null;
 	protected $content = null;
 	protected $styles = array();
 	protected $scripts = array();
 	protected static $flash_messages;
+	
 	public function __construct($file=null){
 		if( $file !== null ) $this->setFile($file);
 		if( isset($_SESSION['flash_messages']) ){
 			self::$flash_messages = $_SESSION['flash_messages'];
 			unset( $_SESSION['flash_messages'] );
-		}else{
+		}elseif( !isset(self::$flash_messages) ){
 			self::$flash_messages = array();
 		}
 	}
@@ -24,12 +26,23 @@ class MF_View {
 	}
 	
 	public function addFlashMessage( $message ){
-		self::$flash_messages[] = $message;
-		$_SESSION['flash_messages'] = self::$flash_messages;
+		if( !in_array($message, self::$flash_messages) ){
+			if( is_array($message) ){
+				if( isset(self::$flash_messages[$message[0]]) ){
+					self::$flash_messages[$message[0]][] = $message[1];
+				}else{
+					self::$flash_messages[$message[0]] = array($message[1]);
+				}
+			}else{
+				self::$flash_messages[] = $message;
+			}
+			var_dump(self::$flash_messages);
+			$_SESSION['flash_messages'] = self::$flash_messages;
+		}
 	}
 	
 	public function getFlashMessages(){
-		return count($flash_messages)>0?self::$flash_messages:false;
+		return count(self::$flash_messages)>0?self::$flash_messages:false;
 	}
 	
 	protected function getStyles(){
@@ -115,25 +128,42 @@ class MF_View {
 	}
 	
 	public static function getURL( array $parts, $overwrite = false ){
-		/*$url = '/'.BASE_URL.'/';
-		$vars = "";
-		if( !isset($parts['controller']) ) $parts['controller'] = $overwrite? MF_Application::getBootstrap()->getDefaultController():MF_Application::getBootstrap()->getController();
-		if( !isset($parts['action']) ) $parts['action'] = $overwrite? MF_Application::getBootstrap()->getDefaultAction():MF_Application::getBootstrap()->getAction();
+		$url = '/'.BASE_URL.'/';
+		if( $overwrite ){
+			$request = MF_Request::getInstance();
+			$vars = $request->getParamsGet();
+		}else{
+			$vars = array();
+		}
 		foreach( $parts as $k => $v ){
-			if( $k != 'controller' && $k != 'action' ){
-				if( $overwrite ){
-					
-				}else{
-					$vars .= "{$k}/{$v}/";
-				}
+			if( $k != 'module' && $k != 'controller' && $k != 'action' ){
+				$vars[$k] = $v;
 			}
 		}
+		//if( !isset($parts['module']) ) $parts['module'] = $overwrite? MF_Bootstrap::getModule() : MF_Bootstrap::getDefaultModule();
+		if( !isset($parts['module']) ) $parts['module'] = MF_Bootstrap::getModule(); // Always to the same module
+		if( !isset($parts['controller']) ) $parts['controller'] = $overwrite? MF_Bootstrap::getController() : MF_Bootstrap::getDefaultController();
+		if( !isset($parts['action']) ) $parts['action'] = $overwrite? MF_Bootstrap::getAction() : MF_Bootstrap::getDefaultAction();
 		
-		if( $overwrite ){
-			
-		}else{
-			
+		$print_vars = count($vars) > 0;
+		$print_action = $print_vars || $parts['action'] != MF_Bootstrap::getDefaultAction();
+		$print_controller = $print_action || $parts['controller'] != MF_Bootstrap::getDefaultController();
+		$print_module = $parts['module'] != MF_Bootstrap::getDefaultModule();
+		
+		if( $print_module ){
+			$url .= $parts['module'].'/';
 		}
-		var_dump($url);exit;*/
+		if( $print_controller ){
+			$url .= $parts['controller'].'/';
+		}
+		if( $print_action ){
+			$url .= $parts['action'].'/';
+		}
+		if( $print_vars ){
+			foreach( $vars as $k => $v ){
+				$url .= "{$k}/{$v}/";
+			}
+		}
+		return $url;
 	}
 }
