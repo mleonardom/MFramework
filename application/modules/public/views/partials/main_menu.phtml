@@ -1,0 +1,12 @@
+<?php
+	$auth = MF_Auth::getInstance();
+	if( $auth->isLogged() ):
+?>
+		<a href="<?php echo $this->getUrl( array('controller'=>'auth', 'action'=>'logout') ); ?>">Logout</a>
+<?php
+	else:
+?>
+		<!-- Menu for unlogued users -->
+<?php
+	endif;
+?>

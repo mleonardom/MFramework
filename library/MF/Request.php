@@ -54,6 +54,14 @@ class MF_Request{
 		return array_merge($this->_get_params, $this->_post_params);
 	}
 	
+	public function getParamsGet(){
+		return $this->_get_params;
+	}
+	
+	public function getParamsPost(){
+		return $this->_post_params;
+	}
+	
 	public function setGetParams(array $params){
 		$this->_get_params = $params;
 	}
