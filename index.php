@@ -26,5 +26,7 @@
 	
     $application = new MF_Application();
 	$application->getBootstrap()->setModules( array('public', 'admin') );
+	$application->getBootstrap()->addRoute( 'login', array( 'controller'=>'auth', 'action'=>'login' ) );
+	$application->getBootstrap()->addRoute( 'logout', array( 'controller'=>'auth', 'action'=>'logout' ) );
     $application->getBootstrap()->_run();
 ?>

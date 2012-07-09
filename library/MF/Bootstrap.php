@@ -3,6 +3,13 @@ class MF_Bootstrap{
 	
 	/**
 	 * 
+	 * The defaults routes
+	 * @var array
+	 */
+	protected $routes=array();
+	
+	/**
+	 * 
 	 * The request URI parts
 	 * @var array
 	 */
@@ -85,7 +92,17 @@ class MF_Bootstrap{
 	}
 	
 	/**
+	 * Add a default route, i.e. addRoute( 'login', array('controller'=>'auth','action=>'login') )
+	 * @param string $route_alias
+	 * @param array $route
+	 */
+	public function addRoute( $route_alias, array $route ){
+		$this->routes[$route_alias] = $route;
+	}
+	
+	/**
 	 * Set the modules, if are more that one
+	 * @param array $modules
 	 */
 	public function setModules( array $modules ){
 		if( !is_null($modules) && !empty($modules) && count($modules) > 0 ){
@@ -123,6 +140,32 @@ class MF_Bootstrap{
 		}
 		if( $requri[0] == "/" ) $requri=substr($requri,1);
 		$this->request_uri_parts = $requri ? explode('/',$requri) : array();
+		//var_dump( $this->request_uri_parts );exit;
+		if( isset($this->request_uri_parts[0]) ){
+			if( array_key_exists( $this->request_uri_parts[0], $this->routes) ){
+				$req = array();
+				if( array_key_exists( 'model', $this->routes[$this->request_uri_parts[0]] ) ){
+					$req[] = $this->routes[$this->request_uri_parts[0]]['model'];
+					unset( $this->routes[$this->request_uri_parts[0]]['model'] );
+				}
+				if( array_key_exists( 'controller', $this->routes[$this->request_uri_parts[0]] ) ){
+					$req[] = $this->routes[$this->request_uri_parts[0]]['controller'];
+					unset( $this->routes[$this->request_uri_parts[0]]['controller'] );
+				}
+				if( array_key_exists( 'action', $this->routes[$this->request_uri_parts[0]] ) ){
+					$req[] = $this->routes[$this->request_uri_parts[0]]['action'];
+					unset( $this->routes[$this->request_uri_parts[0]]['action'] );
+				}
+				
+				$vars = array();
+				foreach( $this->routes[$this->request_uri_parts[0]] as $k => $v ){
+					$req[] = $k;
+					$req[] = $v;
+				}
+				$this->request_uri_parts = $req;
+			}
+		}
+		//var_dump( $this->request_uri_parts );exit;
 		return $this;
 	}
 	
