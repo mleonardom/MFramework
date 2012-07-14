@@ -97,7 +97,17 @@ class MF_Bootstrap{
 	 * @param array $route
 	 */
 	public function addRoute( $route_alias, array $route ){
-		$this->routes[$route_alias] = $route;
+		$parts = explode( '/:', $route_alias );
+		if( count($parts) > 1 ){
+			$embeded_vars = array();
+			for( $i=1; $i<count($parts); $i++ ){
+				$embeded_vars[] = $parts[$i];
+			}
+			$route['embeded_vars'] = $embeded_vars;
+			$this->routes[$parts[0]] = $route;
+		}else{
+			$this->routes[$route_alias] = $route;
+		}
 	}
 	
 	/**
@@ -156,8 +166,14 @@ class MF_Bootstrap{
 					$req[] = $this->routes[$this->request_uri_parts[0]]['action'];
 					unset( $this->routes[$this->request_uri_parts[0]]['action'] );
 				}
-				
 				$vars = array();
+				if( isset($this->routes[$this->request_uri_parts[0]]['embeded_vars']) ){
+					foreach($this->routes[$this->request_uri_parts[0]]['embeded_vars'] as $k => $v) {
+						$req[] = $v;
+						$req[] = isset($this->request_uri_parts[($k+1)])? $this->request_uri_parts[($k+1)]: false;
+					}
+					unset($this->routes[$this->request_uri_parts[0]]['embeded_vars']);
+				}
 				foreach( $this->routes[$this->request_uri_parts[0]] as $k => $v ){
 					$req[] = $k;
 					$req[] = $v;
@@ -165,7 +181,6 @@ class MF_Bootstrap{
 				$this->request_uri_parts = $req;
 			}
 		}
-		//var_dump( $this->request_uri_parts );exit;
 		return $this;
 	}
 	
