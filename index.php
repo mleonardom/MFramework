@@ -15,13 +15,11 @@
 	    get_include_path(),
 	)));
 	
-	// set the base URL
-	define('BASE_URL','MFramework');
+	require_once APPLICATION_PATH.'/.config/Configuration.php';
 	
-	// set environtment
-	define('ENVIROTMENT','development'); // can be: production or development
+	$configuration = new Configuration();
+	$configuration->loadConfiguration();
 	
-	require_once(APPLICATION_PATH.'/.config/application.php');
 	require_once 'MF/Application.php';
 	
     $application = new MF_Application();
