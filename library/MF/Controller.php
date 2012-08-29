@@ -45,6 +45,13 @@ abstract class MF_Controller{
 	
 	/**
 	 * 
+	 * true when is called the renderJSON function, this prevents for views renders and wrong headers senders
+	 * @var boolean
+	 */
+	protected $is_alredy_render = false;
+	
+	/**
+	 * 
 	 * Construct for controller, The $view_content var is an instance for the action view to render 
 	 * @param MF_View $view_content
 	 */
@@ -63,10 +70,21 @@ abstract class MF_Controller{
 	
 	/**
 	 * 
+	 * This function will render a response in JSON
+	 */
+	public function renderJSON( $response ){
+		header('Cache-Control: no-cache, must-revalidate');
+		header('Content-type: application/json');
+		echo json_encode( $response );
+		$this->is_alredy_render = true;
+	}
+	
+	/**
+	 * 
 	 * This function will render the views
 	 */
 	public function renderView(){
-		if( !$this->is_redirected ){
+		if( !$this->is_redirected && !$this->is_alredy_render ){
 			if( $this->view->getFile() === null || $this->view->getFile() === false ){
 				$this->view->render($this->view_content);
 			}else{
