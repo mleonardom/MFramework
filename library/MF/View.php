@@ -36,7 +36,6 @@ class MF_View {
 			}else{
 				self::$flash_messages[] = $message;
 			}
-			var_dump(self::$flash_messages);
 			$_SESSION['flash_messages'] = self::$flash_messages;
 		}
 	}
