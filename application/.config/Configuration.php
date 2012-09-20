@@ -5,7 +5,7 @@ class Configuration{
 	// set here the domains and IP's
 	protected $_hosts = array(
 		'development' => array('localhost', '127.0.0.1'),
-		'production' => 'production-domain.com' // you can add here any domains into an array
+		'production' => 'productiondomain.com' // you can add here any domains into an array
 	);
 	
 	// set here the global configurations
