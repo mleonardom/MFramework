@@ -73,6 +73,20 @@
 
             return false;
         }
+		
+		public function selectFromSQL($sql)
+        {
+            $db = MF_Database::getDatabase();
+
+            $db->query($sql);
+            if($db->hasRows()){
+                $row = $db->getRow();
+                $this->load($row);
+                return true;
+            }
+
+            return false;
+        }
 
         public function ok(){
             return !is_null($this->id);
