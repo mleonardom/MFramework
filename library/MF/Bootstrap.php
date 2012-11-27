@@ -148,36 +148,42 @@ class MF_Bootstrap{
 		}elseif($requri[0] == '/' && strpos($requri,BASE_URL)===1){
 			$requri=substr($requri,strlen(BASE_URL)+1);
 		}
+		$requri = str_replace( '/?', '/', $requri);
+		$requri = str_replace( '?', '/', $requri);
+		$requri = str_replace( '=', '/', $requri);
+		$requri = str_replace( '&', '/', $requri);
 		if( $requri[0] == "/" ) $requri=substr($requri,1);
 		$this->request_uri_parts = $requri ? explode('/',$requri) : array();
-		//var_dump( $this->request_uri_parts );exit;
 		if( isset($this->request_uri_parts[0]) ){
-			if( array_key_exists( $this->request_uri_parts[0], $this->routes) ){
+			$req_plain = $this->request_uri_parts[0];
+			if( array_key_exists( $req_plain, $this->routes) ){
 				$req = array();
-				if( array_key_exists( 'model', $this->routes[$this->request_uri_parts[0]] ) ){
-					$req[] = $this->routes[$this->request_uri_parts[0]]['model'];
-					unset( $this->routes[$this->request_uri_parts[0]]['model'] );
+				if( array_key_exists( 'module', $this->routes[$req_plain] ) ){
+					$req[] = $this->routes[$req_plain]['module'];
+					unset( $this->routes[$req_plain]['module'] );
 				}
-				if( array_key_exists( 'controller', $this->routes[$this->request_uri_parts[0]] ) ){
-					$req[] = $this->routes[$this->request_uri_parts[0]]['controller'];
-					unset( $this->routes[$this->request_uri_parts[0]]['controller'] );
+				if( array_key_exists( 'controller', $this->routes[$req_plain] ) ){
+					$req[] = $this->routes[$req_plain]['controller'];
+					unset( $this->routes[$req_plain]['controller'] );
 				}
-				if( array_key_exists( 'action', $this->routes[$this->request_uri_parts[0]] ) ){
-					$req[] = $this->routes[$this->request_uri_parts[0]]['action'];
-					unset( $this->routes[$this->request_uri_parts[0]]['action'] );
+				if( array_key_exists( 'action', $this->routes[$req_plain] ) ){
+					$req[] = $this->routes[$req_plain]['action'];
+					unset( $this->routes[$req_plain]['action'] );
 				}
 				$vars = array();
-				if( isset($this->routes[$this->request_uri_parts[0]]['embeded_vars']) ){
-					foreach($this->routes[$this->request_uri_parts[0]]['embeded_vars'] as $k => $v) {
+				if( isset($this->routes[$req_plain]['embeded_vars']) ){
+					foreach($this->routes[$req_plain]['embeded_vars'] as $k => $v) {
 						$req[] = $v;
 						$req[] = isset($this->request_uri_parts[($k+1)])? $this->request_uri_parts[($k+1)]: false;
+						unset($this->request_uri_parts[($k+1)]);
 					}
-					unset($this->routes[$this->request_uri_parts[0]]['embeded_vars']);
+					unset($this->routes[$req_plain]['embeded_vars']);
 				}
-				foreach( $this->routes[$this->request_uri_parts[0]] as $k => $v ){
-					$req[] = $k;
+				unset( $this->request_uri_parts[0] );
+				foreach( $this->request_uri_parts as $v ){
 					$req[] = $v;
 				}
+				
 				$this->request_uri_parts = $req;
 			}
 		}
@@ -204,15 +210,6 @@ class MF_Bootstrap{
 			}
 		}
 		foreach( $p as $index => $part ){
-			if( strrpos($part, "?") !== false ) {
-				$params_ov = substr( $part, strrpos($part, "?")+1 );
-				$params_ov = explode("&",$params_ov);
-				foreach( $params_ov as $par ){
-					$p_v = explode('=',$par);
-					$this->params[utf8_decode(urldecode($p_v[0]))] = isset($p_v[1])? utf8_decode(urldecode($p_v[1])):'';
-				}
-				$part = substr( $part, 0, strrpos($part,"?") );
-			}
 			if( $index == 0 && !empty($part) ) {
 				self::$controller = $part;
 			} elseif( $index == 1 && !empty($part) ) {
